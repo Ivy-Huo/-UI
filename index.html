@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EDGE 智能中枢 · 驾驶舱三视图概览</title>
+<style>
+:root{--bg:#050b18;--line:rgba(80,160,255,.18);--cyan:#39e6f0;--blue:#3d8bff;--dim:#7f9cc0;--txt:#e8f4ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei","PingFang SC","Segoe UI",Arial,sans-serif;overflow-x:hidden}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 50% -10%,rgba(61,139,255,.16),transparent 60%)}
+.app{position:relative;z-index:1;max-width:1680px;margin:0 auto;padding:0 20px 24px}
+header{display:flex;align-items:center;gap:14px;padding:14px 4px 12px;border-bottom:1px solid var(--line);margin-bottom:14px;flex-wrap:wrap}
+.logo{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,#2ad4e2,#3d8bff);display:flex;align-items:center;justify-content:center;font-weight:900;color:#04121f;font-size:18px;flex:none}
+.htitle{font-size:19px;font-weight:800;letter-spacing:1px;white-space:nowrap}
+.hsub{font-size:11px;color:var(--dim);margin-top:1px;white-space:nowrap}
+.badge{font-size:10.5px;color:#ffbe4d;border:1px solid rgba(255,190,77,.35);background:rgba(255,190,77,.08);padding:3px 9px;border-radius:12px;white-space:nowrap}
+.spacer{flex:1}
+.tabs{display:flex;gap:5px;background:rgba(255,255,255,.04);padding:4px;border-radius:9px;border:1px solid var(--line)}
+.tabs button{background:transparent;border:0;color:var(--dim);padding:7px 15px;border-radius:6px;font-size:12.5px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.tabs button.on{background:linear-gradient(135deg,rgba(57,230,240,.22),rgba(61,139,255,.22));color:#fff;box-shadow:inset 0 0 0 1px rgba(57,230,240,.35);font-weight:700}
+.btn{border:1px solid rgba(57,230,240,.4);background:rgba(57,230,240,.1);color:var(--cyan);padding:8px 13px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.btn:hover{background:rgba(57,230,240,.2)}
+.btn.primary{background:linear-gradient(135deg,#2ad4e2,#3d8bff);color:#03121f;font-weight:800;border:0}
+.btn:disabled{opacity:.6;cursor:wait}
+#status{font-size:11.5px;color:var(--dim);min-width:120px}
+.stage{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#050b18;box-shadow:0 8px 40px rgba(0,0,0,.45)}
+.frame{display:none}
+.frame.on{display:block}
+.frame svg{display:block;width:100%;height:auto}
+.hint{margin-top:10px;font-size:12px;color:var(--dim);line-height:1.7}
+.hint b{color:var(--cyan)}
+body.clean{background:#050b18}
+body.clean:after{display:none}
+body.clean header,body.clean .hint{display:none}
+body.clean .app{max-width:none;padding:0;margin:0}
+body.clean .stage{border:0;border-radius:0;box-shadow:none}
+body.clean .frame svg{width:100vw;height:100vh}
+#reportOverlay{position:fixed;inset:0;z-index:50;background:#f4f7fb;color:#16233b;display:none;overflow:auto;padding:30px}
+#reportOverlay .rw{max-width:1000px;margin:0 auto;background:#fff;border:1px solid #dce5f0;border-radius:14px;padding:32px 40px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+#reportOverlay h1{font-size:25px;margin:0 0 6px}
+#reportOverlay .rsub{color:#5b6b83;font-size:13px;margin-bottom:20px}
+#reportOverlay .rk{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+#reportOverlay .rk div{background:#eef4fc;border:1px solid #dce5f0;border-radius:9px;padding:13px}
+#reportOverlay .rk b{display:block;font-size:23px;color:#2a5fa8}
+#reportOverlay .rk span{font-size:12px;color:#5b6b83}
+#reportOverlay h2{font-size:16px;border-left:4px solid #2a5fa8;padding-left:10px;margin:20px 0 9px}
+#reportOverlay table{width:100%;border-collapse:collapse;font-size:13px}
+#reportOverlay th,#reportOverlay td{border:1px solid #dce5f0;padding:8px 11px;text-align:left}
+#reportOverlay th{background:#eef3fa}
+#reportOverlay .note{background:#fdf3df;border-left:4px solid #b8760b;padding:11px 15px;font-size:12.5px;color:#6b4a10;margin-top:18px}
+#reportOverlay .close{float:right}
+@media print{body>*{display:none}#reportOverlay{display:block!important;position:static;background:#fff;padding:0}#reportOverlay .rw{box-shadow:none;border:0}#reportOverlay .close,#reportOverlay .noprint{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo">E</div>
+  <div><div class="htitle">EDGE 智能中枢 · 驾驶舱</div><div class="hsub">中信集团科技部 / 云 · 边 · 端 协同运行总览</div></div>
+  <span class="badge">演示数据 · UI 原型</span>
+  <div class="spacer"></div>
+  <div class="tabs">
+    <button class="on" data-v="report">汇报概览</button>
+    <button data-v="ops">运营管理</button>
+    <button data-v="sec">安全合规</button>
+  </div>
+  <button class="btn" id="btnOne">导出本视图 PNG</button>
+  <button class="btn" id="btnAll">一键生成全部概览图</button>
+  <button class="btn primary" id="btnPack">一键生成汇报包</button>
+  <span id="status">就绪</span>
+</header>
+
+<div class="stage">
+<!-- ==================== 视图 1：汇报概览 ==================== -->
+<div class="frame on" id="frame-report">
+<svg id="svg-report" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+<style>text{font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif}</style>
+<defs>
+<linearGradient id="rg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b3a6b" stop-opacity=".55"/><stop offset="1" stop-color="#050b18" stop-opacity="0"/></linearGradient>
+<linearGradient id="rgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#39e6f0" stop-opacity=".38"/><stop offset="1" stop-color="#39e6f0" stop-opacity="0"/></linearGradient>
+<radialGradient id="rgg" cx="50%" cy="0%" r="80%"><stop offset="0" stop-color="#1a3a6b" stop-opacity=".55"/><stop offset="1" stop-color="#050b18" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1600" height="900" fill="#050b18"/>
+<rect width="1600" height="900" fill="url(#rgg)"/>
+<g stroke="#12305a" stroke-width="1" opacity=".5">
+<path d="M0 60H1600M0 120H1600M0 180H1600M0 240H1600M0 300H1600M0 360H1600M0 420H1600M0 480H1600M0 540H1600M0 600H1600M0 660H1600M0 720H1600M0 780H1600M0 840H1600"/>
+<path d="M80 0V900M160 0V900M240 0V900M320 0V900M400 0V900M480 0V900M560 0V900M640 0V900M720 0V900M800 0V900M880 0V900M960 0V900M1040 0V900M1120 0V900M1200 0V900M1280 0V900M1360 0V900M1440 0V900M1520 0V900"/>
+</g>
+<rect x="0" y="0" width="1600" height="88" fill="#081426"/>
+<rect x="0" y="87" width="1600" height="1" fill="#1d3658"/>
+<rect x="28" y="24" width="40" height="40" rx="9" fill="#2ad4e2"/>
+<text x="48" y="51" text-anchor="middle" font-size="20" font-weight="800" fill="#04121f">E</text>
+<text x="84" y="43" font-size="24" font-weight="800" fill="#e8f4ff">集团科技部 · AI 平台建设成效汇报概览</text>
+<text x="84" y="68" font-size="13" fill="#7f9cc0">统计周期 2026.01—11　|　数据来源：Edge 本地调用审计日志 + Work 成效回流　|　生成时间 2026-11-15</text>
+<text x="1572" y="43" text-anchor="end" font-size="13" fill="#ffbe4d">演示数据 · UI 原型</text>
+<text x="1572" y="68" text-anchor="end" font-size="12" fill="#7f9cc0">汇报概览 / 01</text>
+
+<!-- KPI -->
+<g>
+<rect x="28" y="108" width="362" height="120" rx="12" fill="#0b1830" stroke="#1d3658"/><rect x="28" y="108" width="362" height="3" rx="1" fill="#39e6f0"/>
+<text x="48" y="138" font-size="14" fill="#7f9cc0">兄弟公司覆盖</text><text x="48" y="192" font-size="42" font-weight="800" fill="#ffffff">12 <tspan font-size="20" fill="#7f9cc0">/ 16 家</tspan></text><text x="48" y="216" font-size="13" fill="#38e2a0">↑ 本月新增 3 家</text>
+<rect x="422" y="108" width="362" height="120" rx="12" fill="#0b1830" stroke="#1d3658"/><rect x="422" y="108" width="362" height="3" rx="1" fill="#3d8bff"/>
+<text x="442" y="138" font-size="14" fill="#7f9cc0">已上线业务场景</text><text x="442" y="192" font-size="42" font-weight="800" fill="#ffffff">28 <tspan font-size="20" fill="#7f9cc0">个</tspan></text><text x="442" y="216" font-size="13" fill="#38e2a0">↑ 同比 +133%</text>
+<rect x="816" y="108" width="362" height="120" rx="12" fill="#0b1830" stroke="#1d3658"/><rect x="816" y="108" width="362" height="3" rx="1" fill="#a26bff"/>
+<text x="836" y="138" font-size="14" fill="#7f9cc0">年度节省工时（估算）</text><text x="836" y="192" font-size="42" font-weight="800" fill="#ffffff">3.6 <tspan font-size="20" fill="#7f9cc0">万小时</tspan></text><text x="836" y="216" font-size="13" fill="#38e2a0">↑ 同比 +42%</text>
+<rect x="1210" y="108" width="362" height="120" rx="12" fill="#0b1830" stroke="#1d3658"/><rect x="1210" y="108" width="362" height="3" rx="1" fill="#ffbe4d"/>
+<text x="1230" y="138" font-size="14" fill="#7f9cc0">折算降本（估算）</text><text x="1230" y="192" font-size="42" font-weight="800" fill="#ffffff">¥480 <tspan font-size="20" fill="#7f9cc0">万</tspan></text><text x="1230" y="216" font-size="13" fill="#38e2a0">↑ 同比 +38%</text>
+</g>
+
+<!-- 覆盖矩阵 -->
+<rect x="28" y="248" width="760" height="322" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="48" y="248" width="40" height="3" rx="1" fill="#39e6f0"/>
+<text x="48" y="280" font-size="17" font-weight="700" fill="#e8f4ff">集团 / 兄弟公司覆盖</text>
+<text x="48" y="301" font-size="12" fill="#7f9cc0">已开通 12 / 16 家 · 亮色为已上线并产生调用</text>
+<g font-size="12.5">
+<rect x="48" y="320" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="133" y="342" text-anchor="middle" fill="#38e2a0" font-weight="700">科技部</text><text x="133" y="360" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="230" y="320" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="315" y="342" text-anchor="middle" fill="#38e2a0" font-weight="700">中信银行</text><text x="315" y="360" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="412" y="320" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="497" y="342" text-anchor="middle" fill="#38e2a0" font-weight="700">中信证券</text><text x="497" y="360" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="594" y="320" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="679" y="342" text-anchor="middle" fill="#38e2a0" font-weight="700">中信建投</text><text x="679" y="360" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="48" y="384" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="133" y="406" text-anchor="middle" fill="#38e2a0" font-weight="700">中信保诚</text><text x="133" y="424" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="230" y="384" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="315" y="406" text-anchor="middle" fill="#38e2a0" font-weight="700">中信戴卡</text><text x="315" y="424" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="412" y="384" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="497" y="406" text-anchor="middle" fill="#38e2a0" font-weight="700">中信重工</text><text x="497" y="424" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="594" y="384" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="679" y="406" text-anchor="middle" fill="#38e2a0" font-weight="700">中信泰富</text><text x="679" y="424" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="48" y="448" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="133" y="470" text-anchor="middle" fill="#38e2a0" font-weight="700">中信出版</text><text x="133" y="488" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="230" y="448" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="315" y="470" text-anchor="middle" fill="#38e2a0" font-weight="700">中信环境</text><text x="315" y="488" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="412" y="448" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="497" y="470" text-anchor="middle" fill="#38e2a0" font-weight="700">中信医疗</text><text x="497" y="488" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="594" y="448" width="170" height="52" rx="7" fill="#123c33" stroke="#1d7a5c"/><text x="679" y="470" text-anchor="middle" fill="#38e2a0" font-weight="700">中信海直</text><text x="679" y="488" text-anchor="middle" fill="#7f9cc0" font-size="11">● 已上线</text>
+<rect x="48" y="512" width="170" height="52" rx="7" fill="#0e1c34" stroke="#243b5c"/><text x="133" y="534" text-anchor="middle" fill="#7f9cc0">中信国安</text><text x="133" y="552" text-anchor="middle" fill="#5b6b83" font-size="11">○ 待开通</text>
+<rect x="230" y="512" width="170" height="52" rx="7" fill="#0e1c34" stroke="#243b5c"/><text x="315" y="534" text-anchor="middle" fill="#7f9cc0">中信资产</text><text x="315" y="552" text-anchor="middle" fill="#5b6b83" font-size="11">○ 待开通</text>
+<rect x="412" y="512" width="170" height="52" rx="7" fill="#0e1c34" stroke="#243b5c"/><text x="497" y="534" text-anchor="middle" fill="#7f9cc0">中信工程</text><text x="497" y="552" text-anchor="middle" fill="#5b6b83" font-size="11">○ 待开通</text>
+<rect x="594" y="512" width="170" height="52" rx="7" fill="#0e1c34" stroke="#243b5c"/><text x="679" y="534" text-anchor="middle" fill="#7f9cc0">中信数科</text><text x="679" y="552" text-anchor="middle" fill="#5b6b83" font-size="11">○ 待开通</text>
+</g>
+
+<!-- 趋势 -->
+<rect x="812" y="248" width="760" height="322" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="832" y="248" width="40" height="3" rx="1" fill="#3d8bff"/>
+<text x="832" y="280" font-size="17" font-weight="700" fill="#e8f4ff">模型调用量趋势 · 近 12 个月</text>
+<text x="832" y="301" font-size="12" fill="#7f9cc0">单位：万次　|　与调用审计日志逐条可对账</text>
+<text x="1552" y="280" text-anchor="end" font-size="14" font-weight="700" fill="#38e2a0">↑ 同比 +186%</text>
+<g stroke="#1d3658" stroke-width="1"><path d="M852 340H1540M852 390H1540M852 440H1540M852 490H1540M852 530H1540"/></g>
+<path d="M852 512 L914 506 L976 498 L1038 486 L1100 474 L1162 456 L1224 444 L1286 424 L1348 408 L1410 386 L1472 362 L1540 332 L1540 530 L852 530 Z" fill="url(#rgA)"/>
+<path d="M852 512 L914 506 L976 498 L1038 486 L1100 474 L1162 456 L1224 444 L1286 424 L1348 408 L1410 386 L1472 362 L1540 332" fill="none" stroke="#39e6f0" stroke-width="2.6"/>
+<g fill="#39e6f0"><circle cx="1540" cy="332" r="4.5"/><circle cx="1286" cy="424" r="3"/><circle cx="1038" cy="486" r="3"/></g>
+<g font-size="11" fill="#7f9cc0"><text x="852" y="550">1月</text><text x="1038" y="550">4月</text><text x="1224" y="550">7月</text><text x="1410" y="550">10月</text><text x="1508" y="550">12月</text></g>
+
+<!-- 科技创新成效 -->
+<rect x="28" y="590" width="760" height="272" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="48" y="590" width="40" height="3" rx="1" fill="#a26bff"/>
+<text x="48" y="622" font-size="17" font-weight="700" fill="#e8f4ff">服务科技创新体系</text>
+<text x="48" y="643" font-size="12" fill="#7f9cc0">对齐「完善创新链条 / 产学研用一体化 / 成果转化」叙事</text>
+<g font-size="13">
+<text x="48" y="678" fill="#c9d9ef">产学研协同场景</text><rect x="210" y="666" width="470" height="12" rx="6" fill="#132742"/><rect x="210" y="666" width="212" height="12" rx="6" fill="#a26bff"/><text x="770" y="678" text-anchor="end" fill="#e8f4ff" font-weight="700">9 个</text>
+<text x="48" y="718" fill="#c9d9ef">成果转化支撑项目</text><rect x="210" y="706" width="470" height="12" rx="6" fill="#132742"/><rect x="210" y="706" width="376" height="12" rx="6" fill="#3d8bff"/><text x="770" y="718" text-anchor="end" fill="#e8f4ff" font-weight="700">16 项</text>
+<text x="48" y="758" fill="#c9d9ef">沉淀知识文档</text><rect x="210" y="746" width="470" height="12" rx="6" fill="#132742"/><rect x="210" y="746" width="424" height="12" rx="6" fill="#39e6f0"/><text x="770" y="758" text-anchor="end" fill="#e8f4ff" font-weight="700">12.4 万份</text>
+<text x="48" y="798" fill="#c9d9ef">创新链条环节覆盖</text><rect x="210" y="786" width="470" height="12" rx="6" fill="#132742"/><rect x="210" y="786" width="470" height="12" rx="6" fill="#38e2a0"/><text x="770" y="798" text-anchor="end" fill="#e8f4ff" font-weight="700">5 / 5</text>
+</g>
+<text x="48" y="838" font-size="11.5" fill="#5b6b83">从基础研究协同 → 金融科技突破 → 湾区科创赋能 → 成果转化 → 人才闭环，平台已覆盖全链条</text>
+
+<!-- 业绩构成 -->
+<rect x="812" y="590" width="760" height="272" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="832" y="590" width="40" height="3" rx="1" fill="#ffbe4d"/>
+<text x="832" y="622" font-size="17" font-weight="700" fill="#e8f4ff">业绩贡献构成</text>
+<text x="832" y="643" font-size="12" fill="#7f9cc0">按折算系数归一化的贡献占比</text>
+<circle cx="960" cy="735" r="66" fill="none" stroke="#132742" stroke-width="20"/>
+<circle cx="960" cy="735" r="66" fill="none" stroke="#39e6f0" stroke-width="20" stroke-dasharray="190 415" stroke-linecap="round" transform="rotate(-90 960 735)"/>
+<circle cx="960" cy="735" r="66" fill="none" stroke="#3d8bff" stroke-width="20" stroke-dasharray="132 415" stroke-dashoffset="-190" stroke-linecap="round" transform="rotate(-90 960 735)"/>
+<circle cx="960" cy="735" r="66" fill="none" stroke="#ffbe4d" stroke-width="20" stroke-dasharray="91 415" stroke-dashoffset="-322" stroke-linecap="round" transform="rotate(-90 960 735)"/>
+<text x="960" y="730" text-anchor="middle" font-size="24" font-weight="800" fill="#ffffff">100%</text>
+<text x="960" y="752" text-anchor="middle" font-size="11" fill="#7f9cc0">可追溯口径</text>
+<g font-size="13"><rect x="1080" y="694" width="11" height="11" rx="2" fill="#39e6f0"/><text x="1100" y="704" fill="#c9d9ef">工时节约</text><text x="1548" y="704" text-anchor="end" fill="#e8f4ff" font-weight="700">46%</text>
+<rect x="1080" y="728" width="11" height="11" rx="2" fill="#3d8bff"/><text x="1100" y="738" fill="#c9d9ef">效率提升</text><text x="1548" y="738" text-anchor="end" fill="#e8f4ff" font-weight="700">32%</text>
+<rect x="1080" y="762" width="11" height="11" rx="2" fill="#ffbe4d"/><text x="1100" y="772" fill="#c9d9ef">成本节约</text><text x="1548" y="772" text-anchor="end" fill="#e8f4ff" font-weight="700">22%</text></g>
+<rect x="832" y="806" width="716" height="42" rx="7" fill="#12213c" stroke="#243b5c"/>
+<text x="848" y="824" font-size="11.5" fill="#9fb6d4">口径说明：节省工时与折算降本按配置系数估算，可在「指标口径管理」查看系数版本并下钻至原始记录。</text>
+<text x="848" y="841" font-size="11" fill="#5b6b83">本页为 UI 原型演示数据，非真实经营数据。</text>
+
+<text x="28" y="884" font-size="11" fill="#5b6b83">汇报概览　|　所有指标均可下钻至口径说明与原始调用记录，支持一键导出 PPT / PDF / 长图</text>
+</svg>
+</div>
+
+<!-- ==================== 视图 2：运营管理 ==================== -->
+<div class="frame" id="frame-ops">
+<svg id="svg-ops" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+<style>text{font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif}
+.flow{stroke-dasharray:6 8;animation:dash 1.6s linear infinite}@keyframes dash{to{stroke-dashoffset:-28}}
+.pulse{animation:pl 2.2s ease-out infinite;transform-origin:center}@keyframes pl{0%{opacity:.7}100%{opacity:0}}</style>
+<defs>
+<radialGradient id="rgo" cx="50%" cy="0%" r="80%"><stop offset="0" stop-color="#123a5c" stop-opacity=".5"/><stop offset="1" stop-color="#050b18" stop-opacity="0"/></radialGradient>
+<linearGradient id="rgQ" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d8bff" stop-opacity=".42"/><stop offset="1" stop-color="#3d8bff" stop-opacity="0"/></linearGradient>
+<marker id="arO" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L7 4L0 8Z" fill="#39e6f0"/></marker>
+</defs>
+<rect width="1600" height="900" fill="#050b18"/><rect width="1600" height="900" fill="url(#rgo)"/>
+<g stroke="#12305a" opacity=".5"><path d="M0 60H1600M0 120H1600M0 180H1600M0 240H1600M0 300H1600M0 360H1600M0 420H1600M0 480H1600M0 540H1600M0 600H1600M0 660H1600M0 720H1600M0 780H1600M0 840H1600"/><path d="M80 0V900M240 0V900M400 0V900M560 0V900M720 0V900M880 0V900M1040 0V900M1200 0V900M1360 0V900M1520 0V900"/></g>
+<rect width="1600" height="88" fill="#081426"/><rect y="87" width="1600" height="1" fill="#1d3658"/>
+<rect x="28" y="24" width="40" height="40" rx="9" fill="#2ad4e2"/><text x="48" y="51" text-anchor="middle" font-size="20" font-weight="800" fill="#04121f">E</text>
+<text x="84" y="43" font-size="24" font-weight="800" fill="#e8f4ff">运营管理概览</text>
+<text x="84" y="68" font-size="13" fill="#7f9cc0">云 · 边 · 端 实时协同 / 节点健康 / 模型与应用运行态　|　刷新频率 30 秒</text>
+<text x="1572" y="43" text-anchor="end" font-size="13" fill="#ffbe4d">演示数据 · UI 原型</text>
+<text x="1572" y="68" text-anchor="end" font-size="12" fill="#7f9cc0">运营管理 / 02</text>
+
+<g font-size="13">
+<rect x="28" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="44" y="126" fill="#7f9cc0">在线 Edge 节点</text><text x="44" y="166" font-size="30" font-weight="800" fill="#fff">12 <tspan font-size="14" fill="#7f9cc0">个</tspan></text><text x="44" y="186" font-size="11.5" fill="#38e2a0">10 在线 · 2 弱网</text>
+<rect x="288" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="304" y="126" fill="#7f9cc0">本月调用量</text><text x="304" y="166" font-size="30" font-weight="800" fill="#fff">186.4 <tspan font-size="14" fill="#7f9cc0">万</tspan></text><text x="304" y="186" font-size="11.5" fill="#38e2a0">↑ 同比 +186%</text>
+<rect x="548" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="564" y="126" fill="#7f9cc0">平均响应时延</text><text x="564" y="166" font-size="30" font-weight="800" fill="#fff">842 <tspan font-size="14" fill="#7f9cc0">ms</tspan></text><text x="564" y="186" font-size="11.5" fill="#38e2a0">↓ 环比 -12%</text>
+<rect x="808" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="824" y="126" fill="#7f9cc0">调用成功率</text><text x="824" y="166" font-size="30" font-weight="800" fill="#fff">99.87 <tspan font-size="14" fill="#7f9cc0">%</tspan></text><text x="824" y="186" font-size="11.5" fill="#38e2a0">↑ 0.08pp</text>
+<rect x="1068" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="1084" y="126" fill="#7f9cc0">GPU 平均利用率</text><text x="1084" y="166" font-size="30" font-weight="800" fill="#fff">67.4 <tspan font-size="14" fill="#7f9cc0">%</tspan></text><text x="1084" y="186" font-size="11.5" fill="#ffbe4d">容量充足</text>
+<rect x="1328" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="1344" y="126" fill="#7f9cc0">Token 消耗</text><text x="1344" y="166" font-size="30" font-weight="800" fill="#fff">2.94 <tspan font-size="14" fill="#7f9cc0">亿</tspan></text><text x="1344" y="186" font-size="11.5" fill="#ffbe4d">↑ 环比 +21%</text>
+</g>
+
+<!-- 拓扑 -->
+<rect x="28" y="212" width="880" height="388" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="48" y="212" width="40" height="3" rx="1" fill="#39e6f0"/>
+<text x="48" y="244" font-size="17" font-weight="700" fill="#e8f4ff">云 · 边 · 端 实时协同拓扑</text>
+<text x="48" y="264" font-size="12" fill="#7f9cc0">Hub 下发意图与模型 · Edge 本地自治执行 · Work 多应用联动</text>
+<rect x="300" y="278" width="380" height="58" rx="9" fill="#122c52" stroke="#3d8bff"/>
+<circle cx="330" cy="307" r="7" fill="#3d8bff"/><circle cx="330" cy="307" r="12" fill="none" stroke="#3d8bff" class="pulse"/>
+<text x="350" y="303" font-size="14" font-weight="700" fill="#e8f4ff">HUB · 统一模型接入</text><text x="350" y="322" font-size="11" fill="#8fb0d8">模型仓库 / 策略下发 / 授权中心</text>
+<g stroke="#39e6f0" stroke-width="1.6" fill="none" marker-end="url(#arO)"><path d="M380 338 L380 366" class="flow"/><path d="M490 338 L490 366" class="flow"/></g>
+<g stroke="#a26bff" stroke-width="1.6" fill="none" marker-end="url(#arO)"><path d="M600 366 L600 338" class="flow"/></g>
+<g font-size="10.5" fill="#7f9cc0" text-anchor="middle"><text x="360" y="358">管控面</text><text x="490" y="358">数据面</text><text x="640" y="358">遥测面 ↑</text></g>
+<rect x="48" y="370" width="840" height="140" rx="10" fill="#0c2a33" stroke="#1d8b8b"/>
+<rect x="62" y="384" width="130" height="112" rx="8" fill="#1c8f92"/>
+<text x="127" y="426" text-anchor="middle" font-size="16" font-weight="800" fill="#04121f">EDGE</text><text x="127" y="447" text-anchor="middle" font-size="10.5" fill="#063b43">企业侧私有化</text><text x="127" y="465" text-anchor="middle" font-size="10.5" fill="#063b43">可完全独立运行</text>
+<g font-size="11" text-anchor="middle" fill="#cfe9ef">
+<rect x="204" y="384" width="160" height="34" rx="6" fill="#10333c" stroke="#1d7a7c"/><text x="284" y="406">基础管理</text>
+<rect x="372" y="384" width="160" height="34" rx="6" fill="#10333c" stroke="#1d7a7c"/><text x="452" y="406">效率提升</text>
+<rect x="540" y="384" width="160" height="34" rx="6" fill="#10333c" stroke="#1d7a7c"/><text x="620" y="406">安全加固</text>
+<rect x="708" y="384" width="166" height="34" rx="6" fill="#10333c" stroke="#1d7a7c"/><text x="791" y="406">驾驶舱看板</text>
+<rect x="204" y="426" width="222" height="34" rx="6" fill="#10333c" stroke="#1d7a7c"/><text x="315" y="448">统一 API 网关（OpenAI 兼容）</text>
+<rect x="434" y="426" width="222" height="34" rx="6" fill="#10333c" stroke="#1d7a7c"/><text x="545" y="448">多应用注册中心 / 配额</text>
+<rect x="664" y="426" width="210" height="34" rx="6" fill="#12484c" stroke="#39e6f0"/><text x="769" y="448" fill="#39e6f0">模型路由 + 本地运行时</text>
+<rect x="204" y="468" width="330" height="30" rx="6" fill="#10333c" stroke="#1d7a7c"/><text x="369" y="488">本地知识库 / 业务数据（原始数据不出域）</text>
+<rect x="542" y="468" width="332" height="30" rx="6" fill="#10333c" stroke="#1d7a7c"/><text x="708" y="488">同步引擎 / 离线状态机 / Outbox</text>
+</g>
+<g stroke="#a26bff" stroke-width="1.4" fill="none" opacity=".8" marker-end="url(#arO)"><path d="M180 512 L130 536" class="flow"/><path d="M400 512 L370 536" class="flow"/><path d="M620 512 L610 536" class="flow"/><path d="M800 512 L850 536" class="flow"/></g>
+<g font-size="11" text-anchor="middle" fill="#d9c9ff">
+<rect x="48" y="538" width="196" height="42" rx="7" fill="#211a3d" stroke="#6b4fc0"/><text x="146" y="564">科创情报助手</text>
+<rect x="256" y="538" width="196" height="42" rx="7" fill="#211a3d" stroke="#6b4fc0"/><text x="354" y="564">制度政策问答</text>
+<rect x="464" y="538" width="196" height="42" rx="7" fill="#211a3d" stroke="#6b4fc0"/><text x="562" y="564">产学研协同</text>
+<rect x="672" y="538" width="196" height="42" rx="7" fill="#211a3d" stroke="#6b4fc0"/><text x="770" y="564">成果转化助手</text>
+</g>
+<text x="48" y="592" font-size="11" fill="#5b6b83">Work 仅依赖 Edge 网关；模型来源由 Edge 路由决定，断网自动降级本地模型</text>
+
+<!-- 模型构成 + TOP5 -->
+<rect x="924" y="212" width="648" height="388" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="944" y="212" width="40" height="3" rx="1" fill="#3d8bff"/>
+<text x="944" y="244" font-size="16" font-weight="700" fill="#e8f4ff">模型调用构成</text>
+<text x="944" y="264" font-size="11.5" fill="#7f9cc0">本地 / Hub 下发 / 第三方 API</text>
+<circle cx="1030" cy="330" r="56" fill="none" stroke="#132742" stroke-width="17"/>
+<circle cx="1030" cy="330" r="56" fill="none" stroke="#39e6f0" stroke-width="17" stroke-dasharray="183 352" stroke-linecap="round" transform="rotate(-90 1030 330)"/>
+<circle cx="1030" cy="330" r="56" fill="none" stroke="#3d8bff" stroke-width="17" stroke-dasharray="120 352" stroke-dashoffset="-183" stroke-linecap="round" transform="rotate(-90 1030 330)"/>
+<circle cx="1030" cy="330" r="56" fill="none" stroke="#a26bff" stroke-width="17" stroke-dasharray="49 352" stroke-dashoffset="-303" stroke-linecap="round" transform="rotate(-90 1030 330)"/>
+<text x="1030" y="326" text-anchor="middle" font-size="21" font-weight="800" fill="#fff">52%</text><text x="1030" y="346" text-anchor="middle" font-size="10.5" fill="#7f9cc0">本地模型</text>
+<g font-size="12"><rect x="1130" y="296" width="10" height="10" rx="2" fill="#39e6f0"/><text x="1148" y="306" fill="#c9d9ef">本地私有模型</text><text x="1550" y="306" text-anchor="end" fill="#e8f4ff" font-weight="700">52%</text>
+<rect x="1130" y="322" width="10" height="10" rx="2" fill="#3d8bff"/><text x="1148" y="332" fill="#c9d9ef">Hub 下发模型</text><text x="1550" y="332" text-anchor="end" fill="#e8f4ff" font-weight="700">34%</text>
+<rect x="1130" y="348" width="10" height="10" rx="2" fill="#a26bff"/><text x="1148" y="358" fill="#c9d9ef">第三方 API</text><text x="1550" y="358" text-anchor="end" fill="#e8f4ff" font-weight="700">14%</text></g>
+<path d="M944 390 H1552" stroke="#1d3658"/>
+<text x="944" y="416" font-size="16" font-weight="700" fill="#e8f4ff">应用活跃 TOP 5</text>
+<text x="1552" y="416" text-anchor="end" font-size="11" fill="#7f9cc0">按本月调用量</text>
+<g font-size="12">
+<text x="944" y="444" fill="#c9d9ef">科创情报助手</text><text x="1552" y="444" text-anchor="end" fill="#39e6f0">42.8 万</text><rect x="944" y="452" width="608" height="7" rx="3" fill="#132742"/><rect x="944" y="452" width="560" height="7" rx="3" fill="#39e6f0"/>
+<text x="944" y="480" fill="#c9d9ef">制度政策问答</text><text x="1552" y="480" text-anchor="end" fill="#39e6f0">36.1 万</text><rect x="944" y="488" width="608" height="7" rx="3" fill="#132742"/><rect x="944" y="488" width="474" height="7" rx="3" fill="#3d8bff"/>
+<text x="944" y="516" fill="#c9d9ef">产学研协同助手</text><text x="1552" y="516" text-anchor="end" fill="#39e6f0">28.7 万</text><rect x="944" y="524" width="608" height="7" rx="3" fill="#132742"/><rect x="944" y="524" width="376" height="7" rx="3" fill="#3d8bff"/>
+<text x="944" y="552" fill="#c9d9ef">成果转化助手</text><text x="1552" y="552" text-anchor="end" fill="#39e6f0">21.4 万</text><rect x="944" y="560" width="608" height="7" rx="3" fill="#132742"/><rect x="944" y="560" width="280" height="7" rx="3" fill="#a26bff"/>
+<text x="944" y="588" fill="#c9d9ef">研发代码助手</text><text x="1552" y="588" text-anchor="end" fill="#39e6f0">15.9 万</text><rect x="944" y="594" width="608" height="6" rx="3" fill="#132742"/><rect x="944" y="594" width="208" height="6" rx="3" fill="#a26bff"/>
+</g>
+
+<!-- 节点健康表 -->
+<rect x="28" y="616" width="880" height="246" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="48" y="616" width="40" height="3" rx="1" fill="#a26bff"/>
+<text x="48" y="648" font-size="16" font-weight="700" fill="#e8f4ff">Edge 节点健康</text>
+<text x="888" y="648" text-anchor="end" font-size="11.5" fill="#7f9cc0">「离线」与「不健康」分开显示</text>
+<rect x="48" y="658" width="840" height="26" rx="5" fill="#12233e"/>
+<g font-size="11.5" fill="#8fb0d8"><text x="60" y="676">节点</text><text x="250" y="676">所属单位</text><text x="500" y="676">状态</text><text x="660" y="676">QPS</text><text x="790" y="676">延迟</text></g>
+<g font-size="12" fill="#c9d9ef">
+<text x="60" y="706">edge-bj-01</text><text x="250" y="706">集团科技部</text><text x="500" y="706" fill="#38e2a0">● 在线</text><text x="660" y="706">1,284</text><text x="790" y="706">812 ms</text>
+<text x="60" y="730">edge-sh-02</text><text x="250" y="730">中信银行</text><text x="500" y="730" fill="#38e2a0">● 在线</text><text x="660" y="730">968</text><text x="790" y="730">845 ms</text>
+<text x="60" y="754">edge-sz-03</text><text x="250" y="754">中信证券</text><text x="500" y="754" fill="#38e2a0">● 在线</text><text x="660" y="754">742</text><text x="790" y="754">790 ms</text>
+<text x="60" y="778">edge-gz-04</text><text x="250" y="778">中信建投</text><text x="500" y="778" fill="#ffbe4d">● 弱网（正常）</text><text x="660" y="778">516</text><text x="790" y="778">1,120 ms</text>
+<text x="60" y="802">edge-hk-05</text><text x="250" y="802">中信泰富</text><text x="500" y="802" fill="#7f9cc0">● 离线（本地自治）</text><text x="660" y="802">388</text><text x="790" y="802">760 ms</text>
+<text x="60" y="826">edge-tj-06</text><text x="250" y="826">中信重工</text><text x="500" y="826" fill="#38e2a0">● 在线</text><text x="660" y="826">294</text><text x="790" y="826">868 ms</text>
+<text x="60" y="850">edge-cd-07</text><text x="250" y="850">中信医疗</text><text x="500" y="850" fill="#ff6b6b">● 不健康（需处理）</text><text x="660" y="850">0</text><text x="790" y="850">—</text>
+</g>
+
+<!-- QPS + 告警 -->
+<rect x="924" y="616" width="648" height="246" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="944" y="616" width="40" height="3" rx="1" fill="#ffbe4d"/>
+<text x="944" y="648" font-size="16" font-weight="700" fill="#e8f4ff">实时 QPS 与告警待办</text>
+<g stroke="#1d3658"><path d="M944 690H1552M944 720H1552M944 750H1552M944 776H1552"/></g>
+<path d="M944 772 L980 766 L1016 770 L1052 752 L1088 758 L1124 738 L1160 744 L1196 726 L1232 732 L1268 712 L1304 718 L1340 700 L1376 706 L1412 692 L1448 698 L1484 684 L1520 690 L1552 676 L1552 776 L944 776 Z" fill="url(#rgQ)"/>
+<path d="M944 772 L980 766 L1016 770 L1052 752 L1088 758 L1124 738 L1160 744 L1196 726 L1232 732 L1268 712 L1304 718 L1340 700 L1376 706 L1412 692 L1448 698 L1484 684 L1520 690 L1552 676" fill="none" stroke="#3d8bff" stroke-width="2"/>
+<text x="1552" y="668" text-anchor="end" font-size="11.5" fill="#38e2a0">当前 1,284 QPS</text>
+<g font-size="11.5"><circle cx="950" cy="802" r="4" fill="#ff6b6b"/><text x="962" y="806" fill="#c9d9ef">edge-cd-07 节点心跳丢失，已自动切换备节点</text>
+<circle cx="950" cy="826" r="4" fill="#ffbe4d"/><text x="962" y="830" fill="#c9d9ef">研发代码助手配额使用 82%，建议提额</text>
+<circle cx="950" cy="850" r="4" fill="#3d8bff"/><text x="962" y="854" fill="#c9d9ef">待审批：2 个应用接入申请、1 个模型配额申请</text></g>
+
+<text x="28" y="884" font-size="11" fill="#5b6b83">运营管理　|　指标来自本地调用审计日志与节点心跳，断网期间本地缓冲、恢复后补传</text>
+</svg>
+</div>
+
+<!-- ==================== 视图 3：安全合规 ==================== -->
+<div class="frame" id="frame-sec">
+<svg id="svg-sec" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+<style>text{font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif}
+.flow{stroke-dasharray:6 8;animation:dash 1.6s linear infinite}@keyframes dash{to{stroke-dashoffset:-28}}</style>
+<defs>
+<radialGradient id="rgs" cx="50%" cy="0%" r="80%"><stop offset="0" stop-color="#103a34" stop-opacity=".5"/><stop offset="1" stop-color="#050b18" stop-opacity="0"/></radialGradient>
+<linearGradient id="rgS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38e2a0" stop-opacity=".35"/><stop offset="1" stop-color="#38e2a0" stop-opacity="0"/></linearGradient>
+<marker id="arS" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L7 4L0 8Z" fill="#38e2a0"/></marker>
+</defs>
+<rect width="1600" height="900" fill="#050b18"/><rect width="1600" height="900" fill="url(#rgs)"/>
+<g stroke="#12305a" opacity=".5"><path d="M0 60H1600M0 120H1600M0 180H1600M0 240H1600M0 300H1600M0 360H1600M0 420H1600M0 480H1600M0 540H1600M0 600H1600M0 660H1600M0 720H1600M0 780H1600M0 840H1600"/><path d="M80 0V900M240 0V900M400 0V900M560 0V900M720 0V900M880 0V900M1040 0V900M1200 0V900M1360 0V900M1520 0V900"/></g>
+<rect width="1600" height="88" fill="#081426"/><rect y="87" width="1600" height="1" fill="#1d3658"/>
+<rect x="28" y="24" width="40" height="40" rx="9" fill="#2ad4e2"/><text x="48" y="51" text-anchor="middle" font-size="20" font-weight="800" fill="#04121f">E</text>
+<text x="84" y="43" font-size="24" font-weight="800" fill="#e8f4ff">安全合规概览</text>
+<text x="84" y="68" font-size="13" fill="#7f9cc0">数据不出域 / 策略本地执行 / 全量审计可追溯　|　合规基线与整改闭环</text>
+<text x="1572" y="43" text-anchor="end" font-size="13" fill="#ffbe4d">演示数据 · UI 原型</text>
+<text x="1572" y="68" text-anchor="end" font-size="12" fill="#7f9cc0">安全合规 / 03</text>
+
+<g font-size="13">
+<rect x="28" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="44" y="126" fill="#7f9cc0">审计日志覆盖率</text><text x="44" y="166" font-size="30" font-weight="800" fill="#fff">100 <tspan font-size="14" fill="#7f9cc0">%</tspan></text><text x="44" y="186" font-size="11.5" fill="#38e2a0">全量可追溯</text>
+<rect x="288" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="304" y="126" fill="#7f9cc0">脱敏拦截</text><text x="304" y="166" font-size="30" font-weight="800" fill="#fff">1,284 <tspan font-size="14" fill="#7f9cc0">次</tspan></text><text x="304" y="186" font-size="11.5" fill="#38e2a0">本月累计</text>
+<rect x="548" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="564" y="126" fill="#7f9cc0">内容护栏拦截</text><text x="564" y="166" font-size="30" font-weight="800" fill="#fff">326 <tspan font-size="14" fill="#7f9cc0">次</tspan></text><text x="564" y="186" font-size="11.5" fill="#38e2a0">本月累计</text>
+<rect x="808" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="824" y="126" fill="#7f9cc0">合规基线通过率</text><text x="824" y="166" font-size="30" font-weight="800" fill="#fff">98.6 <tspan font-size="14" fill="#7f9cc0">%</tspan></text><text x="824" y="186" font-size="11.5" fill="#38e2a0">↑ 1.4pp</text>
+<rect x="1068" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="1084" y="126" fill="#7f9cc0">数据出域请求</text><text x="1084" y="166" font-size="30" font-weight="800" fill="#38e2a0">0 <tspan font-size="14" fill="#7f9cc0">次</tspan></text><text x="1084" y="186" font-size="11.5" fill="#38e2a0">符合预期</text>
+<rect x="1328" y="100" width="244" height="96" rx="10" fill="#0b1830" stroke="#1d3658"/><text x="1344" y="126" fill="#7f9cc0">越权调用拦截</text><text x="1344" y="166" font-size="30" font-weight="800" fill="#fff">7 <tspan font-size="14" fill="#7f9cc0">次</tspan></text><text x="1344" y="186" font-size="11.5" fill="#ffbe4d">已全部处置</text>
+</g>
+
+<!-- 数据不出域链路 -->
+<rect x="28" y="212" width="880" height="388" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="48" y="212" width="40" height="3" rx="1" fill="#38e2a0"/>
+<text x="48" y="244" font-size="17" font-weight="700" fill="#e8f4ff">数据不出域链路</text>
+<text x="48" y="264" font-size="12" fill="#7f9cc0">原始业务数据只落 Edge；上行仅脱敏聚合指标，企业可逐项授权或整体关闭</text>
+<rect x="48" y="292" width="230" height="150" rx="10" fill="#102e28" stroke="#1d7a5c"/>
+<text x="163" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#38e2a0">本地原始数据</text>
+<g font-size="11.5" fill="#a8d8c8" text-anchor="middle"><text x="163" y="350">原始提示词</text><text x="163" y="372">业务文档 / 知识库</text><text x="163" y="394">调用明细 / 用户信息</text><text x="163" y="422" fill="#38e2a0" font-weight="700">仅存 Edge 本地</text></g>
+<rect x="322" y="292" width="230" height="150" rx="10" fill="#10233f" stroke="#2a5fa8"/>
+<text x="437" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#7fb4ff">本地安全执行点</text>
+<g font-size="11.5" fill="#a8c6e8" text-anchor="middle"><text x="437" y="350">输入护栏 / 注入拦截</text><text x="437" y="372">敏感字段脱敏</text><text x="437" y="394">最小权限 / 全量审计</text><text x="437" y="422" fill="#7fb4ff" font-weight="700">断网仍持续生效</text></g>
+<rect x="596" y="292" width="288" height="150" rx="10" fill="#1c1838" stroke="#6b4fc0"/>
+<text x="740" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#c4aaff">脱敏聚合指标（可选上行）</text>
+<g font-size="11.5" fill="#c9bdea" text-anchor="middle"><text x="740" y="350">调用量 / 成功率 / Token</text><text x="740" y="372">节点健康 / 同步进度</text><text x="740" y="394">已去除个人与业务明细</text><text x="740" y="422" fill="#c4aaff" font-weight="700">→ Hub 全局视图（需授权）</text></g>
+<g stroke="#38e2a0" stroke-width="2" fill="none" marker-end="url(#arS)"><path d="M280 366 L318 366" class="flow"/><path d="M554 366 L592 366" class="flow"/></g>
+<rect x="48" y="462" width="836" height="50" rx="8" fill="#0e241f" stroke="#1d7a5c"/>
+<text x="66" y="484" font-size="13" font-weight="700" fill="#38e2a0">抓包验收：上行报文不含原始业务内容</text>
+<text x="66" y="503" font-size="11.5" fill="#8fbfae">证书双向认证（mTLS / 国密可插拔）· Edge 主动出连 · 出向域名白名单 · 密钥加密存储不落日志</text>
+<rect x="48" y="526" width="836" height="58" rx="8" fill="#12213c" stroke="#243b5c"/>
+<text x="66" y="548" font-size="12.5" fill="#c9d9ef">四态离线安全基线：在线 / 弱网 / 离线 / 完全气隙，本地账号、脱敏、护栏、审计、最小权限在断网 72 小时后仍全部生效。</text>
+<text x="66" y="570" font-size="11.5" fill="#7f9cc0">气隙环境通过离线 License、离线模型/策略/升级包导入完成部署，全程签名验签，零外联请求。</text>
+
+<!-- 拦截趋势 -->
+<rect x="924" y="212" width="648" height="388" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="944" y="212" width="40" height="3" rx="1" fill="#ffbe4d"/>
+<text x="944" y="244" font-size="16" font-weight="700" fill="#e8f4ff">安全拦截趋势 · 近 12 周</text>
+<text x="944" y="264" font-size="11.5" fill="#7f9cc0">脱敏 / 护栏 / 越权三类拦截量</text>
+<g stroke="#1d3658"><path d="M944 300H1552M944 340H1552M944 380H1552M944 420H1552M944 452H1552"/></g>
+<path d="M944 445 L998 438 L1052 430 L1106 422 L1160 414 L1214 402 L1268 394 L1322 384 L1376 374 L1430 360 L1484 344 L1552 320 L1552 452 L944 452 Z" fill="url(#rgS)"/>
+<path d="M944 445 L998 438 L1052 430 L1106 422 L1160 414 L1214 402 L1268 394 L1322 384 L1376 374 L1430 360 L1484 344 L1552 320" fill="none" stroke="#38e2a0" stroke-width="2.4"/>
+<path d="M944 450 L998 448 L1052 446 L1106 444 L1160 442 L1214 440 L1268 438 L1322 436 L1376 434 L1430 432 L1484 430 L1552 428" fill="none" stroke="#3d8bff" stroke-width="2"/>
+<path d="M944 452 L998 452 L1052 451 L1106 451 L1160 451 L1214 450 L1268 450 L1322 450 L1376 449 L1430 449 L1484 449 L1552 448" fill="none" stroke="#ff6b6b" stroke-width="2"/>
+<g font-size="11"><rect x="944" y="470" width="10" height="10" rx="2" fill="#38e2a0"/><text x="962" y="480" fill="#c9d9ef">脱敏拦截</text><rect x="1060" y="470" width="10" height="10" rx="2" fill="#3d8bff"/><text x="1078" y="480" fill="#c9d9ef">护栏拦截</text><rect x="1176" y="470" width="10" height="10" rx="2" fill="#ff6b6b"/><text x="1194" y="480" fill="#c9d9ef">越权拦截</text></g>
+<path d="M944 492 H1552" stroke="#1d3658"/>
+<text x="944" y="514" font-size="13" font-weight="700" fill="#e8f4ff">本月安全事件</text>
+<g font-size="11.5">
+<text x="944" y="536" fill="#c9d9ef">异常调用量告警 3 起 · 暴力破解尝试 2 起</text><text x="1552" y="536" text-anchor="end" fill="#ffbe4d">已处置</text>
+<text x="944" y="558" fill="#c9d9ef">模型包验签失败 / 审计日志篡改检测</text><text x="1552" y="558" text-anchor="end" fill="#38e2a0">0 起</text>
+<text x="944" y="580" fill="#c9d9ef">内审证据包按需导出 · 数据出域请求</text><text x="1552" y="580" text-anchor="end" fill="#38e2a0" font-weight="700">0 次</text>
+</g>
+
+<!-- 策略执行清单 -->
+<rect x="28" y="616" width="880" height="246" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="48" y="616" width="40" height="3" rx="1" fill="#a26bff"/>
+<text x="48" y="648" font-size="16" font-weight="700" fill="#e8f4ff">安全策略执行清单</text>
+<text x="888" y="648" text-anchor="end" font-size="11.5" fill="#7f9cc0">策略由 Hub 下发、Edge 本地执行</text>
+<g font-size="12.5">
+<circle cx="62" cy="678" r="6" fill="#38e2a0"/><text x="78" y="683" fill="#c9d9ef">mTLS 双向认证与证书轮换</text><text x="450" y="683" fill="#38e2a0">生效</text>
+<circle cx="500" cy="678" r="6" fill="#38e2a0"/><text x="516" y="683" fill="#c9d9ef">敏感字段脱敏规则</text><text x="870" y="683" fill="#38e2a0">生效</text>
+<circle cx="62" cy="712" r="6" fill="#38e2a0"/><text x="78" y="717" fill="#c9d9ef">输入输出双向内容护栏</text><text x="450" y="717" fill="#38e2a0">生效</text>
+<circle cx="500" cy="712" r="6" fill="#38e2a0"/><text x="516" y="717" fill="#c9d9ef">应用级最小权限与配额</text><text x="870" y="717" fill="#38e2a0">生效</text>
+<circle cx="62" cy="746" r="6" fill="#38e2a0"/><text x="78" y="751" fill="#c9d9ef">密钥加密存储与定期轮换</text><text x="450" y="751" fill="#38e2a0">生效</text>
+<circle cx="500" cy="746" r="6" fill="#38e2a0"/><text x="516" y="751" fill="#c9d9ef">模型包签名验签与溯源</text><text x="870" y="751" fill="#38e2a0">生效</text>
+<circle cx="62" cy="780" r="6" fill="#38e2a0"/><text x="78" y="785" fill="#c9d9ef">全量调用审计与防篡改</text><text x="450" y="785" fill="#38e2a0">生效</text>
+<circle cx="500" cy="780" r="6" fill="#38e2a0"/><text x="516" y="785" fill="#c9d9ef">离线自治安全基线</text><text x="870" y="785" fill="#38e2a0">生效</text>
+<circle cx="62" cy="814" r="6" fill="#38e2a0"/><text x="78" y="819" fill="#c9d9ef">日志留存归档与一键销毁</text><text x="450" y="819" fill="#38e2a0">生效</text>
+<circle cx="500" cy="814" r="6" fill="#ffbe4d"/><text x="516" y="819" fill="#c9d9ef">镜像依赖漏洞扫描</text><text x="870" y="819" fill="#ffbe4d">复测中</text>
+</g>
+<text x="48" y="848" font-size="11" fill="#5b6b83">基线核查：等保 / 密评适配项，输出整改清单并跟踪闭环</text>
+
+<!-- 合规通过率 + 整改 -->
+<rect x="924" y="616" width="648" height="246" rx="12" fill="#0b1830" stroke="#1d3658"/>
+<rect x="944" y="616" width="40" height="3" rx="1" fill="#39e6f0"/>
+<text x="944" y="648" font-size="16" font-weight="700" fill="#e8f4ff">合规基线与整改</text>
+<circle cx="1030" cy="734" r="58" fill="none" stroke="#132742" stroke-width="16"/>
+<circle cx="1030" cy="734" r="58" fill="none" stroke="#38e2a0" stroke-width="16" stroke-dasharray="359 364" stroke-linecap="round" transform="rotate(-90 1030 734)"/>
+<text x="1030" y="730" text-anchor="middle" font-size="22" font-weight="800" fill="#fff">98.6%</text><text x="1030" y="752" text-anchor="middle" font-size="10.5" fill="#7f9cc0">基线通过率</text>
+<g font-size="12"><text x="1130" y="694" fill="#c9d9ef">已通过核查项</text><text x="1550" y="694" text-anchor="end" fill="#38e2a0" font-weight="700">142 / 144</text>
+<text x="1130" y="722" fill="#c9d9ef">待整改项</text><text x="1550" y="722" text-anchor="end" fill="#ffbe4d" font-weight="700">2 项</text>
+<text x="1130" y="750" fill="#c9d9ef">高危漏洞</text><text x="1550" y="750" text-anchor="end" fill="#38e2a0" font-weight="700">0 个</text>
+<text x="1130" y="778" fill="#c9d9ef">审计证据包</text><text x="1550" y="778" text-anchor="end" fill="#38e2a0" font-weight="700">可按需导出</text></g>
+<rect x="944" y="800" width="608" height="46" rx="7" fill="#12213c" stroke="#243b5c"/>
+<text x="960" y="820" font-size="11.5" fill="#c9d9ef">整改跟踪：① 镜像依赖漏洞扫描复测（本周）　② 证书轮换演练记录归档（下周）</text>
+<text x="960" y="838" font-size="11" fill="#5b6b83">全量审计日志签名防篡改，内审可导出；留存到期归档 / 销毁均留痕。</text>
+
+<text x="28" y="884" font-size="11" fill="#5b6b83">安全合规　|　演示数据，非真实经营与合规结论；上线前须以实际测评与内审结果为准</text>
+</svg>
+</div>
+</div>
+
+<div class="hint">
+<b>三种概览图：</b>汇报概览（业绩与覆盖，面向向上汇报）· 运营管理（拓扑、节点、模型与应用运行态）· 安全合规（数据不出域、拦截、策略与基线）。
+<b>一键生成：</b>「导出本视图 PNG」导出当前图；「一键生成全部概览图」把三张图拼成一张长图一次下载；「一键生成汇报包」打开含三张图 + 简报表格的打印页，可直接另存 PDF。
+所有概览图均为<b>自包含 SVG</b>，无外部字体/图片依赖，导出后可直接贴进 PPT 或 Word。
+</div>
+</div>
+
+<!-- 一键生成汇报包（打印页） -->
+<div id="reportOverlay">
+  <div class="rw">
+    <button class="btn close noprint" style="color:#2a5fa8;border-color:#b7d2f2;background:#eef4fc" onclick="document.getElementById('reportOverlay').style.display='none'">关闭</button>
+    <h1>集团科技部 · AI 平台建设成效简报</h1>
+    <div class="rsub">统计周期：2026 年 1 月 — 11 月　|　数据来源：Edge 本地调用审计日志与 Work 成效回流　|　生成时间：<span id="rtime"></span></div>
+    <div class="rk"><div><b>12 / 16</b><span>兄弟公司覆盖</span></div><div><b>28 个</b><span>已上线业务场景</span></div><div><b>3.6 万 h</b><span>年度节省工时（估算）</span></div><div><b>¥480 万</b><span>折算降本（估算）</span></div></div>
+    <h2>一、平台建设与协同成效</h2>
+    <table><tr><th>指标</th><th>本期</th><th>同比</th><th>口径说明</th></tr>
+    <tr><td>纳管 Work 应用</td><td>18 个</td><td>+125%</td><td>应用注册中心中状态为「已上架」的 AppID 数</td></tr>
+    <tr><td>模型调用量</td><td>1,842 万次</td><td>+186%</td><td>统一网关成功返回的 /v1/chat/completions 请求数</td></tr>
+    <tr><td>平台可用率</td><td>99.95%</td><td>+0.12pp</td><td>按分钟心跳统计，含离线自治运行时段</td></tr>
+    <tr><td>本地模型占比</td><td>52%</td><td>+18pp</td><td>本地模型调用 / 全部模型调用</td></tr></table>
+    <h2>二、服务科技创新体系（对齐「完善创新链条 / 产学研用一体化」）</h2>
+    <table><tr><th>方向</th><th>落地场景</th><th>量化成效</th></tr>
+    <tr><td>产学研协同</td><td>高校合作情报、重点实验室材料、联合课题助手</td><td>9 个场景，覆盖 6 家子公司</td></tr>
+    <tr><td>成果转化</td><td>成果台账问答、转化材料生成、专利检索辅助</td><td>支撑 16 个项目</td></tr>
+    <tr><td>创新链条</td><td>制度政策问答、项目管理、研发助手</td><td>沉淀知识文档 12.4 万份</td></tr></table>
+    <h2>三、安全与自主可控</h2>
+    <p style="font-size:13px">数据不出域，原始提示词与业务文档全部留存企业本地；上行仅脱敏聚合指标。断网 / 气隙状态下完成���功能验收，审计日志覆盖率 100%，合规基线通过率 98.6%，数据出域请求 0 次。</p>
+    <h2>四、三张驾驶舱概览图</h2>
+    <div id="packImages" style="display:grid;gap:14px"></div>
+    <div class="note">口径说明：节省工时与折算降本为按配置折算系数估算，可在「指标口径管理」中查看系数版本并下钻至原始调用记录。本页为原型演示数据，非真实经营数据。</div>
+    <div style="margin-top:20px" class="noprint"><button class="btn primary" style="background:linear-gradient(135deg,#2ad4e2,#3d8bff);color:#03121f" onclick="window.print()">打印 / 另存 PDF</button></div>
+  </div>
+</div>
+
+<script>
+const VIEWS={report:{svg:'svg-report',file:'驾驶舱_01_汇报概览.png',title:'汇报概览'},
+             ops:{svg:'svg-ops',file:'驾驶舱_02_运营管理.png',title:'运营管理'},
+             sec:{svg:'svg-sec',file:'驾驶舱_03_安全合规.png',title:'安全合规'}};
+const ORDER=['report','ops','sec'];
+let cur='report';
+const statusEl=document.getElementById('status');
+function setStatus(t){statusEl.textContent=t;}
+
+function serialize(id){
+  const el=document.getElementById(id).cloneNode(true);
+  el.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  el.setAttribute('width','1600'); el.setAttribute('height','900');
+  return '<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(el);
+}
+function loadImg(id){
+  return new Promise((resolve,reject)=>{
+    const blob=new Blob([serialize(id)],{type:'image/svg+xml;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const img=new Image();
+    img.onload=()=>resolve({img,url});
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('SVG 渲染失败'));};
+    img.src=url;
+  });
+}
+function download(blob,name){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+function downloadSvg(id,name){
+  download(new Blob([serialize(id)],{type:'image/svg+xml;charset=utf-8'}),name);
+}
+async function exportOne(){
+  setStatus('生成中…');
+  try{
+    const v=VIEWS[cur], {img,url}=await loadImg(v.svg);
+    const c=document.createElement('canvas'); c.width=1600;c.height=900;
+    c.getContext('2d').drawImage(img,0,0,1600,900);
+    URL.revokeObjectURL(url);
+    c.toBlob(b=>{download(b,v.file);setStatus('已导出 '+v.title);},'image/png');
+  }catch(e){setStatus('导出失败：'+e.message);}
+}
+async function exportAll(){
+  const btn=document.getElementById('btnAll'); btn.disabled=true; setStatus('生成中…');
+  try{
+    const c=document.createElement('canvas'); c.width=1600; c.height=900*3+24*2;
+    const ctx=c.getContext('2d'); ctx.fillStyle='#050b18'; ctx.fillRect(0,0,c.width,c.height);
+    for(let i=0;i<ORDER.length;i++){
+      setStatus('生成 '+(i+1)+'/3 …');
+      const {img,url}=await loadImg(VIEWS[ORDER[i]].svg);
+      ctx.drawImage(img,0,i*(900+24),1600,900);
+      URL.revokeObjectURL(url);
+    }
+    c.toBlob(b=>{download(b,'驾驶舱_三视图概览图_全部.png');setStatus('三张概览图已生成');},'image/png');
+  }catch(e){setStatus('生成失败：'+e.message);}
+  finally{btn.disabled=false;}
+}
+async function buildPack(){
+  setStatus('生成汇报包…');
+  const box=document.getElementById('packImages'); box.innerHTML='';
+  for(const k of ORDER){
+    const v=VIEWS[k];
+    const wrap=document.createElement('div');
+    wrap.style.cssText='border:1px solid #dce5f0;border-radius:8px;overflow:hidden;background:#050b18';
+    const cap=document.createElement('div');
+    cap.style.cssText='padding:6px 12px;font-size:12px;color:#5b6b83;background:#fff';
+    cap.textContent=v.title+'（'+v.file+'）';
+    const holder=document.createElement('div');
+    holder.innerHTML=serialize(v.svg).replace(/^<\?xml[^>]*\?>\s*/,'');
+    holder.firstChild.setAttribute('width','100%'); holder.firstChild.removeAttribute('height');
+    wrap.appendChild(cap); wrap.appendChild(holder.firstChild); box.appendChild(wrap);
+  }
+  document.getElementById('rtime').textContent=new Date().toLocaleString('zh-CN');
+  document.getElementById('reportOverlay').style.display='block';
+  setStatus('汇报包已生成，可打印 / 另存 PDF');
+}
+function switchView(v){
+  cur=v;
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  ORDER.forEach(k=>document.getElementById('frame-'+k).classList.toggle('on',k===v));
+  try{history.replaceState(null,'','?view='+v+(new URLSearchParams(location.search).has('clean')?'&clean=1':''));}catch(e){}
+  setStatus('当前：'+VIEWS[v].title);
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>switchView(b.dataset.v));
+document.getElementById('btnOne').onclick=exportOne;
+document.getElementById('btnAll').onclick=exportAll;
+document.getElementById('btnPack').onclick=buildPack;
+document.getElementById('reportOverlay').onclick=e=>{if(e.target.id==='reportOverlay')e.target.style.display='none';};
+document.getElementById('rtime').textContent=new Date().toLocaleString('zh-CN');
+
+const p=new URLSearchParams(location.search);
+if(p.get('clean')==='1')document.body.classList.add('clean');
+if(VIEWS[p.get('view')])switchView(p.get('view'));
+</script>
+</body>
+</html>
